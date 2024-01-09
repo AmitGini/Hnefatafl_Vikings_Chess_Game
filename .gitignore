@@ -1,0 +1,18 @@
+# Default ignored files
+/shelf/
+/.idea/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+# Folders
+out/
+lib/
+.idea/
+# Other
+Assignment_OOP_Hnefatafl.pdf
+Hnefatafl_Vikings_Chess_Game.iml
+Output Example 1.txt
+Output Example 2.txt
+VikingsChess.jar
