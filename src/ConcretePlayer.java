@@ -11,7 +11,7 @@ public class ConcretePlayer implements Player{
 
     // method return true if its player1 and false if not.
     public boolean isPlayerOne(){
-        return playerOne; //true if its player1;
+        return !(playerOne); //true if its player1;
     }
 
     //return the number of times the player has won.

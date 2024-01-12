@@ -1,16 +1,19 @@
 public class Position {
-    private int row, col;
+
+    //fields represent the rows and columns at the board game
+    private final int x, y;
+
     //Constructor, getting row and col, coordinates on the map.
-    public Position(int col, int row){
-        this.row = row;
-        this.col = col;
+    public Position(int y, int x){
+        this.x = x;
+        this.y = y;
     }
 
-    public int getRow(){
-        return this.row;
+    public int getX(){
+        return this.x;
     }
 
-    public int getCol(){
-        return this.col;
+    public int getY(){
+        return this.y;
     }
 }

@@ -8,8 +8,8 @@ public class GameLogic implements PlayableLogic {
 
     //constructor, initialize game logic
     public GameLogic(){
-        this.player1 = new ConcretePlayer(true); //defender
-        this.player2 = new ConcretePlayer(false); //attacker (first move in new game)
+        this.player1 = new ConcretePlayer(false); //defender
+        this.player2 = new ConcretePlayer(true); //attacker (first move in new game)
         initGame();
     }
 
@@ -72,10 +72,9 @@ public class GameLogic implements PlayableLogic {
         }
     }
 
-
     //check if the king is a specific position
     public boolean isThatTheKing(Position a){
-        return boardPieces[a.getRow()][a.getCol()].getType().equals("♔"); //check if its types are equals
+        return boardPieces[a.getX()][a.getY()].getType().equals("♔"); //check if its types are equals
     }
 
     //define if its valid move, updating the board(2D array), checking if the enemy has defeated according to the new position.
@@ -86,10 +85,10 @@ public class GameLogic implements PlayableLogic {
         }
 
         //calculate valid logic
-        boolean isHorizontal = a.getCol() != b.getCol(); //check the direction move, the direction is horizontal if the columns are not equal
-        int startPosition = isHorizontal ? a.getCol() : a.getRow(); //define the index, start position of the piece, depend on the direction.
-        int endPosition = isHorizontal ? b.getCol() : b.getRow();   //define the index, end position of the piece, depend on the direction.
-        int FixedPosition = isHorizontal ? a.getRow() : a.getCol(); //saving the fixed position according to the direction of the movement
+        boolean isHorizontal = a.getY() != b.getY(); //check the direction move, the direction is horizontal if the columns are not equal
+        int startPosition = isHorizontal ? a.getY() : a.getX(); //define the index, start position of the piece, depend on the direction.
+        int endPosition = isHorizontal ? b.getY() : b.getX();   //define the index, end position of the piece, depend on the direction.
+        int FixedPosition = isHorizontal ? a.getX() : a.getY(); //saving the fixed position according to the direction of the movement
         int step = startPosition < endPosition ? 1 : -1; //step = 1; //define if to move forward or backward.
 
         //loop, check if every position from the start to the end is clear from pieces, else return false - illegal move
@@ -104,8 +103,8 @@ public class GameLogic implements PlayableLogic {
         }
 
         //updating the board according to the position moves
-        boardPieces[b.getRow()][b.getCol()] = boardPieces[a.getRow()][a.getCol()];
-        boardPieces[a.getRow()][a.getCol()] = null;
+        boardPieces[b.getX()][b.getY()] = boardPieces[a.getX()][a.getY()];
+        boardPieces[a.getX()][a.getY()] = null;
 
         //todo:enemy defeated check
         //todo:update the board
@@ -131,31 +130,31 @@ public class GameLogic implements PlayableLogic {
         }
 
         // position out of boundaries
-        if(a.getRow() > getBoardSize() || b.getRow() > getBoardSize() || a.getCol() > getBoardSize() || b.getCol() > getBoardSize()){
+        if(a.getX() > getBoardSize() || b.getX() > getBoardSize() || a.getY() > getBoardSize() || b.getY() > getBoardSize()){
             return true;
         }
 
-        if(a.getRow() != b.getRow() && a.getCol() != b.getCol()){ //illegal move (move not in a row or column)
+        if(a.getX() != b.getX() && a.getY() != b.getY()){ //illegal move (move not in a row or column)
             return true;
         }
 
-        if(a.getRow() == b.getRow() && a.getCol() == b.getCol()){ //same position (click on the same position)
+        if(a.getX() == b.getX() && a.getY() == b.getY()){ //same position (click on the same position)
             return true;
         }
 
         //illegal move for pawns: [0,0],[0,10],[10,0],[10,10]
         if(!(isThatTheKing(a))) {
-            if (b.getRow() == 0 && b.getCol() == 0) return true; // [0,0]
-            if (b.getRow() == 10 && b.getCol() == 0) return true;// [10,0]
-            if (b.getRow() == 0 && b.getCol() == 10) return true;// [0,10]
-            return b.getRow() == 10 && b.getCol() == 10;// [10,10]
+            if (b.getX() == 0 && b.getY() == 0) return true; // [0,0]
+            if (b.getX() == 10 && b.getY() == 0) return true;// [10,0]
+            if (b.getX() == 0 && b.getY() == 10) return true;// [0,10]
+            return b.getX() == 10 && b.getY() == 10;// [10,10]
         }
         return false;
     }
 
     //return the piece that located at given position in the table(2D array)
     public Piece getPieceAtPosition(Position position){
-        return boardPieces[position.getRow()][position.getCol()];
+        return boardPieces[position.getX()][position.getY()];
     }
 
     //return player 1
