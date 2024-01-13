@@ -11,6 +11,7 @@ public class GameLogic implements PlayableLogic {
     public GameLogic(){
         this.player1 = new ConcretePlayer(false); //defender
         this.player2 = new ConcretePlayer(true); //attacker (first move in new game)
+        this.player2Turn = true; //set attacker - player 2 first turn.
         initGame();
     }
 
@@ -24,9 +25,9 @@ public class GameLogic implements PlayableLogic {
 
     //reset the board pieces, all the cells defined as null.
     private void resetBoard(){
-        for (int row = 0; row < BOARD_SIZE; row++){
-            for (int col = 0; col < BOARD_SIZE; col++){
-                boardPieces[row][col] = null;
+        for (int x = 0; x < BOARD_SIZE; x++){
+            for (int y = 0; y < BOARD_SIZE; y++){
+                boardPieces[x][y] = null;
             }
         }
     }
@@ -39,19 +40,19 @@ public class GameLogic implements PlayableLogic {
                          [7,5]
   */
     private void createPlayer1Pieces(){
-        for(int defRowPosition = 3; defRowPosition < 8; defRowPosition++) {
-            for(int defColPosition = 3; defColPosition < 8; defColPosition++) {
+        for(int xPosition = 3; xPosition < 8; xPosition++) {
+            for(int yPosition = 3; yPosition < 8; yPosition++) {
                 //[5,5] KING
-                if(defRowPosition == BOARD_SIZE/2 && defColPosition == BOARD_SIZE/2) {  //set King at [5,5]
-                    boardPieces[defRowPosition][defColPosition] = new King(getFirstPlayer());
+                if(xPosition == BOARD_SIZE/2 && yPosition == BOARD_SIZE/2) {  //set King at [5,5]
+                    boardPieces[xPosition][yPosition] = new King(getFirstPlayer());
                 }
                 //Pawns(around the King) - [4,4],[4,5],[4,6],[5,4],[5,6],[6,4],[6,5],[6,6]
-                else if(defRowPosition > 3 && defColPosition > 3 && defRowPosition < 7 && defColPosition < 7) {
-                    boardPieces[defRowPosition][defColPosition] = new Pawn(getFirstPlayer());
+                else if(xPosition > 3 && yPosition > 3 && xPosition < 7 && yPosition < 7) {
+                    boardPieces[xPosition][yPosition] = new Pawn(getFirstPlayer());
                 }
                 //Pawns - [3,5], [5,3], [5,7], [7,5]
-                else if((defRowPosition + 2 == defColPosition || defColPosition + 2 == defRowPosition)){
-                    boardPieces[defRowPosition][defColPosition] = new Pawn(getFirstPlayer());
+                else if((xPosition + 2 == yPosition || yPosition + 2 == xPosition)){
+                    boardPieces[xPosition][yPosition] = new Pawn(getFirstPlayer());
                 }
             }
         }
@@ -59,16 +60,16 @@ public class GameLogic implements PlayableLogic {
 
     //  creating the attacker - Player 2
     private void createPlayer2Pieces(){
-        for(int defPositions = 1; defPositions < BOARD_SIZE-1; defPositions++){
-            if(defPositions > 2 && defPositions < 8) {
-                boardPieces[0][defPositions] = new Pawn(getSecondPlayer());
-                boardPieces[BOARD_SIZE-1][defPositions] = new Pawn(getSecondPlayer());
-                boardPieces[defPositions][0] = new Pawn(getSecondPlayer());
-                boardPieces[defPositions][BOARD_SIZE-1] = new Pawn(getSecondPlayer());
+        for(int player2Pieces = 1; player2Pieces < BOARD_SIZE-1; player2Pieces++){
+            if(player2Pieces > 2 && player2Pieces < 8) {
+                boardPieces[0][player2Pieces] = new Pawn(getSecondPlayer());
+                boardPieces[BOARD_SIZE-1][player2Pieces] = new Pawn(getSecondPlayer());
+                boardPieces[player2Pieces][0] = new Pawn(getSecondPlayer());
+                boardPieces[player2Pieces][BOARD_SIZE-1] = new Pawn(getSecondPlayer());
             }
-            if(defPositions == 9 || defPositions == 1){
-                boardPieces[defPositions][5] = new Pawn(getSecondPlayer());
-                boardPieces[5][defPositions] = new Pawn(getSecondPlayer());
+            if(player2Pieces == 9 || player2Pieces == 1){
+                boardPieces[player2Pieces][5] = new Pawn(getSecondPlayer());
+                boardPieces[5][player2Pieces] = new Pawn(getSecondPlayer());
             }
         }
     }
@@ -137,6 +138,7 @@ public class GameLogic implements PlayableLogic {
 
 
     private void capture(Position pieceCaptured){
+        //todo:save the defeated enemy's
         this.boardPieces[pieceCaptured.getX()][pieceCaptured.getY()] = null;
     }
 
@@ -167,6 +169,7 @@ public class GameLogic implements PlayableLogic {
         }
 
         //updating the board according to the position moves
+        //todo:save the moves that made
         this.boardPieces[b.getX()][b.getY()] = this.boardPieces[a.getX()][a.getY()];
         this.boardPieces[a.getX()][a.getY()] = null;
 
@@ -177,8 +180,7 @@ public class GameLogic implements PlayableLogic {
             checkCapture(b, 0, -1);
         }
 
-        //todo:save the moves that made
-        //todo:save the defeated enemy's
+
 
 
         if(isGameFinished()){ //todo:consider the option to move the init game to the isGameFinished function
@@ -218,8 +220,10 @@ public class GameLogic implements PlayableLogic {
     @Override
     public boolean isGameFinished(){
         if(isSecondPlayerTurn()){
+            //todo: increase the number of wins
             return false; //todo: edit
         }else{
+            //todo:increase the number of wins
             if(isThatTheKing(new Position(0,0))){return true;}
             else if(isThatTheKing(new Position(10,0))){return true;}
             else if(isThatTheKing(new Position(0,10))){return true;}
