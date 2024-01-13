@@ -2,6 +2,7 @@ public class GameLogic implements PlayableLogic {
 
     private final int BOARD_SIZE = 11;
     private final Piece[][] boardPieces = new ConcretePiece[BOARD_SIZE][BOARD_SIZE];
+
     private Player player1; //defender
     private Player player2; //attacker (first move in new game)
     private boolean player2Turn;
@@ -22,7 +23,7 @@ public class GameLogic implements PlayableLogic {
     }
 
     //reset the board pieces, all the cells defined as null.
-    public void resetBoard(){
+    private void resetBoard(){
         for (int row = 0; row < BOARD_SIZE; row++){
             for (int col = 0; col < BOARD_SIZE; col++){
                 boardPieces[row][col] = null;
@@ -37,7 +38,7 @@ public class GameLogic implements PlayableLogic {
                     [6,4][6,5][6,6]
                          [7,5]
   */
-    public void createPlayer1Pieces(){
+    private void createPlayer1Pieces(){
         for(int defRowPosition = 3; defRowPosition < 8; defRowPosition++) {
             for(int defColPosition = 3; defColPosition < 8; defColPosition++) {
                 //[5,5] KING
@@ -57,7 +58,7 @@ public class GameLogic implements PlayableLogic {
     }
 
     //  creating the attacker - Player 2
-    public void createPlayer2Pieces(){
+    private void createPlayer2Pieces(){
         for(int defPositions = 1; defPositions < BOARD_SIZE-1; defPositions++){
             if(defPositions > 2 && defPositions < 8) {
                 boardPieces[0][defPositions] = new Pawn(getSecondPlayer());
@@ -72,15 +73,78 @@ public class GameLogic implements PlayableLogic {
         }
     }
 
+
+    //check if the move is valid, return true if not.
+    private boolean isNotValidMove(Position a, Position b){
+        // position out of boundaries bigger then the size of the board
+        if(a.getX() >= getBoardSize() || b.getX() >= getBoardSize() || a.getY() >= getBoardSize() || b.getY() >= getBoardSize()){
+            return true;
+        }
+
+        // position out of boundaries smaller than the size of the board
+        if(a.getX() < 0 || b.getX() < 0  || a.getY() < 0  || b.getY() < 0 ){
+            return true;
+        }
+
+        if(a.getX() != b.getX() && a.getY() != b.getY()){ //illegal move (move not in a row or column)
+            return true;
+        }
+
+        if(a.getX() == b.getX() && a.getY() == b.getY()){ //same position (click on the same position)
+            return true;
+        }
+
+        //illegal move for pawns: [0,0],[0,10],[10,0],[10,10]
+        if(!(isThatTheKing(a))) {
+            if (b.getX() == 0 && b.getY() == 0) return true; // [0,0]
+            if (b.getX() == 10 && b.getY() == 0) return true;// [10,0]
+            if (b.getX() == 0 && b.getY() == 10) return true;// [0,10]
+            return b.getX() == 10 && b.getY() == 10;// [10,10]
+        }
+        return false;
+    }
+
+    //check whose turn is it, and the owner of the piece
+    private boolean isItMyPieceAndTurn(Position a){
+        if(getPieceAtPosition(a) == null) return false;
+        boolean isPlayer1Piece = getPieceAtPosition(a).getOwner().isPlayerOne();//is it the first player piece?
+        //case1: player 2 turn and player 1 piece = illegal move, case2: player 1 turn and player 2 piece = illegal move - every case like this will return true.
+        boolean myPieceAndTurn = ((isSecondPlayerTurn() && !(isPlayer1Piece)) || (!(isSecondPlayerTurn()) && isPlayer1Piece));
+        return myPieceAndTurn;
+    }
+
     //check if the king is a specific position
-    public boolean isThatTheKing(Position a){
+    private boolean isThatTheKing(Position a){
         return boardPieces[a.getX()][a.getY()].getType().equals("♔"); //check if its types are equals
     }
 
+    private void checkCapture(Position a, int stepX, int stepY){
+        Position step = new Position(a, stepX, stepY);
+        if(!(isNotValidMove(a,step))){ //get in, if the step is in a valid attack position
+            // get in, if we have piece at this position and only if we have, check if the piece at the next step is the enemy piece and only then get in.
+            if(!(getPieceAtPosition(step) == null)){
+                    if(!(isItMyPieceAndTurn(step)) && !(isThatTheKing(step))) {
+                        Position step2 = new Position(step, stepX, stepY);
+                        if (isNotValidMove(a, step2)) {
+                            capture(step); //capture if the piece got cornered
+                        } else if (isItMyPieceAndTurn(step2) && !(isThatTheKing(step2))) {
+                            capture(step); //capture the piece if we have 2 piece between the enemy piece
+                        }
+                    }
+                }
+            }
+    }
+
+
+    private void capture(Position pieceCaptured){
+        this.boardPieces[pieceCaptured.getX()][pieceCaptured.getY()] = null;
+    }
+
     //define if its valid move, updating the board(2D array), checking if the enemy has defeated according to the new position.
+    @Override
     public boolean move(Position a, Position b){
         //check illegal moves, if illegalMove return true, then return false.(also illegal specific for pawns)
-        if(illegalMove(a,b)){
+        if(isNotValidMove(a,b) || !(isItMyPieceAndTurn(a))){
             return false;
         }
 
@@ -103,11 +167,16 @@ public class GameLogic implements PlayableLogic {
         }
 
         //updating the board according to the position moves
-        boardPieces[b.getX()][b.getY()] = boardPieces[a.getX()][a.getY()];
-        boardPieces[a.getX()][a.getY()] = null;
+        this.boardPieces[b.getX()][b.getY()] = this.boardPieces[a.getX()][a.getY()];
+        this.boardPieces[a.getX()][a.getY()] = null;
 
-        //todo:enemy defeated check
-        //todo:update the board
+        if(!(isThatTheKing(b))) {
+            checkCapture(b, 1, 0);
+            checkCapture(b, -1, 0);
+            checkCapture(b, 0, 1);
+            checkCapture(b, 0, -1);
+        }
+
         //todo:save the moves that made
         //todo:save the defeated enemy's
 
@@ -120,66 +189,49 @@ public class GameLogic implements PlayableLogic {
         return true;
     }
 
-    //check if the move is valid, return true if not.
-    public boolean illegalMove(Position a, Position b){
-        boolean isFirstPlayerPiece = getPieceAtPosition(a).getOwner().isPlayerOne(); //is it the first player piece?
-        //check whose turn is it, and the owner of the piece
-        //case1: player 2 turn and player 1 piece = illegal move, case2: player 1 turn and player 2 piece = illegal move - every case like this will return true.
-        if((isSecondPlayerTurn() && isFirstPlayerPiece) || !(isSecondPlayerTurn()) && !(isFirstPlayerPiece)){
-            return true;
-        }
-
-        // position out of boundaries
-        if(a.getX() > getBoardSize() || b.getX() > getBoardSize() || a.getY() > getBoardSize() || b.getY() > getBoardSize()){
-            return true;
-        }
-
-        if(a.getX() != b.getX() && a.getY() != b.getY()){ //illegal move (move not in a row or column)
-            return true;
-        }
-
-        if(a.getX() == b.getX() && a.getY() == b.getY()){ //same position (click on the same position)
-            return true;
-        }
-
-        //illegal move for pawns: [0,0],[0,10],[10,0],[10,10]
-        if(!(isThatTheKing(a))) {
-            if (b.getX() == 0 && b.getY() == 0) return true; // [0,0]
-            if (b.getX() == 10 && b.getY() == 0) return true;// [10,0]
-            if (b.getX() == 0 && b.getY() == 10) return true;// [0,10]
-            return b.getX() == 10 && b.getY() == 10;// [10,10]
-        }
-        return false;
-    }
 
     //return the piece that located at given position in the table(2D array)
+    @Override
     public Piece getPieceAtPosition(Position position){
         return boardPieces[position.getX()][position.getY()];
     }
 
     //return player 1
+    @Override
     public Player getFirstPlayer() {
         return this.player1;
     }
 
     //return player 2
+    @Override
     public Player getSecondPlayer() {
         return this.player2;
     }
 
     //return true if its player2 turn, else false
+    @Override
     public boolean isSecondPlayerTurn(){
         return this.player2Turn;
     }
 
     //check if the game is finished, according to the turn check win for player 1 or 2, and increase number of wins.
+    @Override
     public boolean isGameFinished(){
+        if(isSecondPlayerTurn()){
+            return false; //todo: edit
+        }else{
+            if(isThatTheKing(new Position(0,0))){return true;}
+            else if(isThatTheKing(new Position(10,0))){return true;}
+            else if(isThatTheKing(new Position(0,10))){return true;}
+            else if(isThatTheKing(new Position(10,10))){return true;}
+            else return false;
+        }
         //todo - check who's turn is it, so we wont have to check both side every turn
         //todo: increase number of wins to player 2 or 1(according to the player turn)
-        return false; //todo: edit
     }
 
     // reset the board pieces(Array 2D), and the information of the players.
+    @Override
     public void reset() {
         this.player1 = new ConcretePlayer(true); //defender
         this.player2 = new ConcretePlayer(false); //attacker (first move in new game)
@@ -187,11 +239,13 @@ public class GameLogic implements PlayableLogic {
     }
 
     //return to the last move that has been made.
+    @Override
     public void undoLastMove(){
     //todo: Idea, export the last object of move at the stack, consider another stack of enemy's to export, also change the player turn.
     }
 
     //return the size of the board.
+    @Override
     public int getBoardSize(){
         return this.BOARD_SIZE;
     }
