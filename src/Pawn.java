@@ -6,7 +6,7 @@ public class Pawn extends ConcretePiece {
         super.player = player;
         //enter unicode of pawn
         super.pieceType = "♟"; //2659 = white pawn unicode
-        numOfKills = 0;
+        this.numOfKills = 0;
     }
 
     public void kill(){

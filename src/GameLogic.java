@@ -5,6 +5,7 @@ public class GameLogic implements PlayableLogic {
 
     private Player player1; //defender
     private Player player2; //attacker (first move in new game)
+    private Position kingPosition;
     private boolean player2Turn;
 
     //constructor, initialize game logic
@@ -13,6 +14,7 @@ public class GameLogic implements PlayableLogic {
         this.player2 = new ConcretePlayer(true); //attacker (first move in new game)
         this.player2Turn = true; //set attacker - player 2 first turn.
         initGame();
+        this.kingPosition = new Position(5,5);
     }
 
     //initial the board to a new game.
@@ -21,6 +23,7 @@ public class GameLogic implements PlayableLogic {
         createPlayer1Pieces(); //create defender - player 1 pawns and king
         createPlayer2Pieces();  //create attacker - player 2 pawns
         this.player2Turn = true; //set attacker - player 2 first turn.
+        this.kingPosition = new Position(5,5);
     }
 
     //reset the board pieces, all the cells defined as null.
@@ -76,7 +79,7 @@ public class GameLogic implements PlayableLogic {
 
 
     //check if the move is valid, return true if not.
-    private boolean isNotValidMove(Position a, Position b){
+    private boolean isInvalidMove(Position a, Position b){
         // position out of boundaries bigger then the size of the board
         if(a.getX() >= getBoardSize() || b.getX() >= getBoardSize() || a.getY() >= getBoardSize() || b.getY() >= getBoardSize()){
             return true;
@@ -110,8 +113,7 @@ public class GameLogic implements PlayableLogic {
         if(getPieceAtPosition(a) == null) return false;
         boolean isPlayer1Piece = getPieceAtPosition(a).getOwner().isPlayerOne();//is it the first player piece?
         //case1: player 2 turn and player 1 piece = illegal move, case2: player 1 turn and player 2 piece = illegal move - every case like this will return true.
-        boolean myPieceAndTurn = ((isSecondPlayerTurn() && !(isPlayer1Piece)) || (!(isSecondPlayerTurn()) && isPlayer1Piece));
-        return myPieceAndTurn;
+        return ((isSecondPlayerTurn() && !(isPlayer1Piece)) || (!(isSecondPlayerTurn()) && isPlayer1Piece));
     }
 
     //check if the king is a specific position
@@ -119,23 +121,37 @@ public class GameLogic implements PlayableLogic {
         return boardPieces[a.getX()][a.getY()].getType().equals("♔"); //check if its types are equals
     }
 
-    private void checkCapture(Position a, int stepX, int stepY){
+    private boolean checkCapture(Position a, int stepX, int stepY){
         Position step = new Position(a, stepX, stepY);
-        if(!(isNotValidMove(a,step))){ //get in, if the step is in a valid attack position
-            // get in, if we have piece at this position and only if we have, check if the piece at the next step is the enemy piece and only then get in.
-            if(!(getPieceAtPosition(step) == null)){
-                    if(!(isItMyPieceAndTurn(step)) && !(isThatTheKing(step))) {
-                        Position step2 = new Position(step, stepX, stepY);
-                        if (isNotValidMove(a, step2)) {
-                            capture(step); //capture if the piece got cornered
-                        } else if (isItMyPieceAndTurn(step2) && !(isThatTheKing(step2))) {
-                            capture(step); //capture the piece if we have 2 piece between the enemy piece
-                        }
+        if (!(isInvalidMove(a,step))){ //get in, if the step is in a valid attack position
+
+            //if the position at step is null, it can occur because the piece at the boarders of the board game
+            // in the other hand if it's the king that god cornered we need to check for player 2 win opportunity
+            if (!(getPieceAtPosition(step) == null)){
+                if (!(isItMyPieceAndTurn(step)) && !(isThatTheKing(step))) {
+                    //if a is the king and next step is not player1 piece then king is blocked.
+                    //at move function we made sure that after player2 move, the turn will change
+                    //so the king will always be at the same turn and check for enemy's surround him
+                    if(isThatTheKing(a)) return true;
+                    Position step2 = new Position(step, stepX, stepY);
+
+                    if (isInvalidMove(a, step2)) {
+                        capture(step); //capture if the piece got cornered
+                        return true;
+
+                    } else if (isItMyPieceAndTurn(step2) && !(isThatTheKing(step2))) {
+                        capture(step); //capture the piece if we have 2 piece between the enemy piece
+                        return true;
                     }
                 }
+                return false;
             }
+            return false;
+        }
+        //if the step checked is invalid move, and it's the king, return true since he is being blocked
+        //and it's a winning option
+        return isThatTheKing(a);
     }
-
 
     private void capture(Position pieceCaptured){
         //todo:save the defeated enemy's
@@ -146,7 +162,7 @@ public class GameLogic implements PlayableLogic {
     @Override
     public boolean move(Position a, Position b){
         //check illegal moves, if illegalMove return true, then return false.(also illegal specific for pawns)
-        if(isNotValidMove(a,b) || !(isItMyPieceAndTurn(a))){
+        if(isInvalidMove(a,b) || !(isItMyPieceAndTurn(a))){
             return false;
         }
 
@@ -173,21 +189,23 @@ public class GameLogic implements PlayableLogic {
         this.boardPieces[b.getX()][b.getY()] = this.boardPieces[a.getX()][a.getY()];
         this.boardPieces[a.getX()][a.getY()] = null;
 
+        //since the king cant capture, check if it's not the king, only then calling checkCapture function
+        //to check if there are pieces of the other player that have been captured.
         if(!(isThatTheKing(b))) {
+            //todo:if checkCapture return true, add number of kills
             checkCapture(b, 1, 0);
             checkCapture(b, -1, 0);
             checkCapture(b, 0, 1);
             checkCapture(b, 0, -1);
-        }
+        }else this.kingPosition = b; //if it's the king we need to update the field representing its position
 
-
-
+        this.player2Turn = !(this.player2Turn); //change the player turns
 
         if(isGameFinished()){ //todo:consider the option to move the init game to the isGameFinished function
             initGame();
         }
 
-        this.player2Turn = !(this.player2Turn); //change the player turns
+
         return true;
     }
 
@@ -219,19 +237,27 @@ public class GameLogic implements PlayableLogic {
     //check if the game is finished, according to the turn check win for player 1 or 2, and increase number of wins.
     @Override
     public boolean isGameFinished(){
-        if(isSecondPlayerTurn()){
+        //changing the turn before isGameFinished function, that why the boolean is set at NOT
+        if(!(isSecondPlayerTurn())){
             //todo: increase the number of wins
-            return false; //todo: edit
+            if (checkCapture(kingPosition,1,0) & checkCapture(kingPosition,-1,0)
+                & checkCapture(kingPosition,0,1) & checkCapture(kingPosition,0,-1)) {
+                this.player2 = new ConcretePlayer(true, this.player2.getWins()); //increase number of wins
+                return true;
+            }
+            return false;
         }else{
             //todo:increase the number of wins
-            if(isThatTheKing(new Position(0,0))){return true;}
-            else if(isThatTheKing(new Position(10,0))){return true;}
-            else if(isThatTheKing(new Position(0,10))){return true;}
-            else if(isThatTheKing(new Position(10,10))){return true;}
+            //checking when its the first player turn if the condition for winning occur.
+            if (getPieceAtPosition(new Position(0,0)) != null
+                    || getPieceAtPosition(new Position(10,0)) != null
+                    || getPieceAtPosition(new Position(0,10)) != null
+                    || getPieceAtPosition(new Position(10,10)) != null ){
+                this.player1 = new ConcretePlayer(false, this.player1.getWins()); //increase number of wins
+                return true;
+            }
             else return false;
         }
-        //todo - check who's turn is it, so we wont have to check both side every turn
-        //todo: increase number of wins to player 2 or 1(according to the player turn)
     }
 
     // reset the board pieces(Array 2D), and the information of the players.
