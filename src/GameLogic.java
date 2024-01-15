@@ -201,10 +201,9 @@ public class GameLogic implements PlayableLogic {
 
         this.player2Turn = !(this.player2Turn); //change the player turns
 
-        if(isGameFinished()){ //todo:consider the option to move the init game to the isGameFinished function
+        if(isGameFinished()) { //todo:consider the option to move the init game to the isGameFinished function
             initGame();
         }
-
 
         return true;
     }
