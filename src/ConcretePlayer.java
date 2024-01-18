@@ -1,7 +1,7 @@
 public class ConcretePlayer implements Player{
 
     private final boolean playerOne; //player1 = true, player2(king) = false
-    private int numberOfWins; //todo: need to update the wins, counting the number of wins
+    private int numberOfWins; //counting the number of wins
 
     //Constructor, player1 = false, player2(king) = true, 0 number of wins for start.
     public ConcretePlayer(boolean player){

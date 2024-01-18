@@ -9,6 +9,11 @@ public class Position {
         this.y = y;
     }
 
+    public Position(Position position){
+        this.x = position.getX();
+        this.y = position.getY();
+    }
+    //from position to another position
     public Position(Position a, int x, int y){
         this.x = a.getX() + x;
         this.y = a.getY() + y;

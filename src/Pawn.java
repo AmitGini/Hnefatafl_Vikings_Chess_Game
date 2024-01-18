@@ -9,8 +9,8 @@ public class Pawn extends ConcretePiece {
         this.numOfKills = 0;
     }
 
-    public void kill(){
-        this.numOfKills++;
+    public int kill(int kills){
+        return this.numOfKills += kills;
     }
 }
 
