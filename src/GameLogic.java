@@ -7,6 +7,7 @@ public class GameLogic implements PlayableLogic {
     private Piece[][] boardPieces = new ConcretePiece[BOARD_SIZE][BOARD_SIZE];
 
     private Stack<Move> moveStack;
+    private Stack<Piece> capturedPiecesStack;
 
     private Player player1; //defender
     private Player player2; //attacker (first move in new game)
@@ -25,7 +26,8 @@ public class GameLogic implements PlayableLogic {
     //initial the board to a new game.
     private void initGame(){
         resetBoard(); //reset the board to null;
-        moveStack = new Stack<Move>(); //init the stacks of moves
+        this.moveStack = new Stack<Move>(); //init the stacks of moves
+        this.capturedPiecesStack = new Stack<Piece>();
         createPlayer1Pieces(); //create defender - player 1 pawns and king
         createPlayer2Pieces();  //create attacker - player 2 pawns
         this.player2Turn = true; //set attacker - player 2 first turn.
@@ -161,7 +163,7 @@ public class GameLogic implements PlayableLogic {
     }
 
     private void capture(Position pieceCaptured){
-        //todo:save the defeated enemy's
+        this.capturedPiecesStack.push(getPieceAtPosition(pieceCaptured));
         this.boardPieces[pieceCaptured.getX()][pieceCaptured.getY()] = null;
     }
 
@@ -289,7 +291,11 @@ public class GameLogic implements PlayableLogic {
                     if(capturedData[i] == null){
                         break;
                     }else{
-                        boardPieces[capturedData[i].getX()][capturedData[i].getY()] = new Pawn(lastMove.getEnemyPlayer());
+                        //todo: think how implement so it will return the same same piece that was deleted.
+                        //todo: so it will save the metadata of every piece.
+                        if(!(capturedPiecesStack.isEmpty())) {
+                            boardPieces[capturedData[i].getX()][capturedData[i].getY()] = capturedPiecesStack.pop();
+                        }
                     }
                 }
             }
