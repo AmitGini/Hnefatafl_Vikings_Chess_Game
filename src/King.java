@@ -5,5 +5,6 @@ public class King extends ConcretePiece {
         super.player = player;
         super.pieceType = "♔"; //2654 = White King unicode
     }
+
 }
 

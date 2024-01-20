@@ -6,8 +6,7 @@ public class GameLogic implements PlayableLogic {
 
     private Piece[][] boardPieces = new ConcretePiece[BOARD_SIZE][BOARD_SIZE];
 
-    private Stack<Move> moveStack;
-    private Stack<Piece> capturedPiecesStack;
+    private Stack<Movements> movementsStack;
 
     private Player player1; //defender
     private Player player2; //attacker (first move in new game)
@@ -26,8 +25,7 @@ public class GameLogic implements PlayableLogic {
     //initial the board to a new game.
     private void initGame(){
         resetBoard(); //reset the board to null;
-        this.moveStack = new Stack<Move>(); //init the stacks of moves
-        this.capturedPiecesStack = new Stack<Piece>();
+        this.movementsStack = new Stack<Movements>(); //init the stacks of moves
         createPlayer1Pieces(); //create defender - player 1 pawns and king
         createPlayer2Pieces();  //create attacker - player 2 pawns
         this.player2Turn = true; //set attacker - player 2 first turn.
@@ -51,19 +49,19 @@ public class GameLogic implements PlayableLogic {
                          [7,5]
   */
     private void createPlayer1Pieces(){
-        for(int xPosition = 3; xPosition < 8; xPosition++) {
-            for(int yPosition = 3; yPosition < 8; yPosition++) {
+        for(int x = 3; x < 8; x++) {
+            for(int y = 3; y < 8; y++) {
                 //[5,5] KING
-                if(xPosition == BOARD_SIZE/2 && yPosition == BOARD_SIZE/2) {  //set King at [5,5]
-                    boardPieces[xPosition][yPosition] = new King(getFirstPlayer());
+                if(x == BOARD_SIZE/2 && y == BOARD_SIZE/2) {  //set King at [5,5]
+                    boardPieces[x][y] = new King(getFirstPlayer());
                 }
                 //Pawns(around the King) - [4,4],[4,5],[4,6],[5,4],[5,6],[6,4],[6,5],[6,6]
-                else if(xPosition > 3 && yPosition > 3 && xPosition < 7 && yPosition < 7) {
-                    boardPieces[xPosition][yPosition] = new Pawn(getFirstPlayer());
+                else if(x > 3 && y > 3 && x < 7 && y < 7) {
+                    boardPieces[x][y] = new Pawn(getFirstPlayer());
                 }
                 //Pawns - [3,5], [5,3], [5,7], [7,5]
-                else if((xPosition + 2 == yPosition || yPosition + 2 == xPosition)){
-                    boardPieces[xPosition][yPosition] = new Pawn(getFirstPlayer());
+                else if((x + 2 == y || y + 2 == x)){
+                    boardPieces[x][y] = new Pawn(getFirstPlayer());
                 }
             }
         }
@@ -71,16 +69,32 @@ public class GameLogic implements PlayableLogic {
 
     //  creating the attacker - Player 2
     private void createPlayer2Pieces(){
-        for(int player2Pieces = 1; player2Pieces < BOARD_SIZE-1; player2Pieces++){
-            if(player2Pieces > 2 && player2Pieces < 8) {
-                boardPieces[0][player2Pieces] = new Pawn(getSecondPlayer());
-                boardPieces[BOARD_SIZE-1][player2Pieces] = new Pawn(getSecondPlayer());
-                boardPieces[player2Pieces][0] = new Pawn(getSecondPlayer());
-                boardPieces[player2Pieces][BOARD_SIZE-1] = new Pawn(getSecondPlayer());
+        int consStartIndex = 0;
+        int consEndIndex = 10;
+
+        for(int y = 3; y < 8; y++){ //[3,0]...[7,0]
+            boardPieces[consStartIndex][y] = new Pawn(getSecondPlayer());
             }
-            if(player2Pieces == 9 || player2Pieces == 1){
-                boardPieces[player2Pieces][5] = new Pawn(getSecondPlayer());
-                boardPieces[5][player2Pieces] = new Pawn(getSecondPlayer());
+
+        boardPieces[1][5] = new Pawn(getSecondPlayer()); //[1,5]
+
+        for(int x = 3; x < 8; x++) { // [3,0],[3,10]..[5,0][5,1][5,9],[5,10]....[7,0][7,10]
+
+            if (x == 5) { //[5,0][5,1][5,9],[5,10]
+                boardPieces[x][consStartIndex] = new Pawn(getSecondPlayer());
+                boardPieces[x][consStartIndex+1] = new Pawn(getSecondPlayer());
+                boardPieces[x][consEndIndex-1] = new Pawn(getSecondPlayer());
+                boardPieces[x][consEndIndex] = new Pawn(getSecondPlayer());
+
+            }else { // [3,0],[3,10]......[7,0][7,10]
+                boardPieces[x][consStartIndex] = new Pawn(getSecondPlayer());
+                boardPieces[x][consEndIndex] = new Pawn(getSecondPlayer());
+            }
+
+            boardPieces[9][5] = new Pawn(getSecondPlayer()); //[9,5]
+
+            for(int i = 3; i < 8; i++){
+                boardPieces[consEndIndex][i] = new Pawn(getSecondPlayer());
             }
         }
     }
@@ -162,9 +176,9 @@ public class GameLogic implements PlayableLogic {
         return isThatTheKing(a);
     }
 
-    private void capture(Position pieceCaptured){
-        this.capturedPiecesStack.push(getPieceAtPosition(pieceCaptured));
-        this.boardPieces[pieceCaptured.getX()][pieceCaptured.getY()] = null;
+    private void capture(Position posCapture){
+        movementsStack.peek().setCapture(posCapture,getPieceAtPosition(posCapture));
+        this.boardPieces[posCapture.getX()][posCapture.getY()] = null;
     }
 
     //define if its valid move, updating the board(2D array), checking if the enemy has defeated according to the new position.
@@ -194,19 +208,21 @@ public class GameLogic implements PlayableLogic {
         }
 
         //updating the board according to the position moves
-        //todo:save the moves that made
         this.boardPieces[b.getX()][b.getY()] = this.boardPieces[a.getX()][a.getY()];
         this.boardPieces[a.getX()][a.getY()] = null;
-        moveStack.push(new Move(b, a, this.player2Turn));
+        movementsStack.push(new Movements(b, a, getPieceAtPosition(b), this.player2Turn));
 
         //since the king cant capture, check if it's not the king, only then calling checkCapture function
         //to check if there are pieces of the other player that have been captured.
-        if(!(isThatTheKing(b))) {
-            //todo:if checkCapture return true, add number of kills
-            if(checkCapture(b, 1, 0)) moveStack.peek().setCapture(b, 1, 0);
-            if(checkCapture(b, -1, 0)) moveStack.peek().setCapture(b, -1, 0);
-            if(checkCapture(b, 0, 1)) moveStack.peek().setCapture(b, 0, 1);
-            if(checkCapture(b, 0, -1)) moveStack.peek().setCapture(b, 0, -1);
+        //checking if its the king position even after I update, because the function check
+        //the position king field, that updated only at the else.
+        if(!(isThatTheKing(a))) {
+            //todo: update numOfCapture if return true + update the number of captured by every piece
+            int numOfCapture = 0;
+            checkCapture(b, 1, 0);
+            checkCapture(b, -1, 0);
+            checkCapture(b, 0, 1);
+            checkCapture(b, 0, -1);
         }else this.kingPosition = b; //if it's the king we need to update the field representing its position
 
         this.player2Turn = !(this.player2Turn); //change the player turns
@@ -279,32 +295,34 @@ public class GameLogic implements PlayableLogic {
     @Override
     public void undoLastMove(){
     //todo: Idea, export the last object of move at the stack, consider another stack of enemy's to export, also change the player turn.
-        if(!(moveStack.isEmpty())) {
-            Move lastMove = moveStack.pop();
+        if(!(movementsStack.isEmpty())) {
+            Movements lastMove = movementsStack.pop();
+            Position currentPos = lastMove.getCurrentPosition();
+            Position previousPos = lastMove.getPreviousPosition();
             this.player2Turn = lastMove.getPlayerTurn();
-            move(lastMove.getCurrentPosition(), lastMove.getPreviousPosition());
+            move(currentPos, previousPos);
 
             //if it's not the king we need to check if their any captured enemy we need to return.
-            if(!(isThatTheKing(lastMove.getPreviousPosition()))){
-                Position[] capturedData = lastMove.getCaptured();
+            if(!(isThatTheKing(previousPos))){
+                Position[] capturedPos = lastMove.getCapturedPosition();
+                Piece[] capturedPieces = lastMove.getCapturedPieces();
                 for(int i = 0; i < 4; i++){
-                    if(capturedData[i] == null){
+                    if(capturedPos[i] == null || capturedPieces[i] == null){
                         break;
                     }else{
-                        //todo: think how implement so it will return the same same piece that was deleted.
-                        //todo: so it will save the metadata of every piece.
-                        if(!(capturedPiecesStack.isEmpty())) {
-                            boardPieces[capturedData[i].getX()][capturedData[i].getY()] = capturedPiecesStack.pop();
-                        }
+                        //edit number of captures made by a piece
+                        //returning the piece that was captured
+                        //todo: NOTE TO REMEMMBER capture save in movement so when using pop the object disappear with his number of captures.
+                        //todo: if I wont fix the problame at movement change need to be done.
+                        this.boardPieces[capturedPos[i].getX()][capturedPos[i].getY()] = capturedPieces[i];
                     }
                 }
             }
-
             // since the adding moves to the stack is placed at the move function and also changing the player turn
             // we got to make sure the previous move won't be added again to the stack after being popped,
             // and also make sure this is the turn of the previous player, by changing once
             //for valid move, piece and turn the same, and also return again after the move has been made.
-            moveStack.pop();
+            if(!(movementsStack.isEmpty())) movementsStack.pop();
             this.player2Turn = lastMove.getPlayerTurn();
         }
     }

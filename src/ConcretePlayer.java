@@ -27,5 +27,4 @@ public class ConcretePlayer implements Player{
         return numberOfWins;
     }
 
-
 }

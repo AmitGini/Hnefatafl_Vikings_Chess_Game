@@ -7,12 +7,15 @@ public class ConcretePiece implements Piece{
     public ConcretePiece(){
     }
 
+    @Override
     public Player getOwner() {
         return this.player;
     }
 
+    @Override
     public String getType(){
         return this.pieceType;
     }
+
 
 }
