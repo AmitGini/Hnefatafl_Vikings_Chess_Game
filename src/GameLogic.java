@@ -18,7 +18,6 @@ public class GameLogic implements PlayableLogic {
     private Position kingPosition;
     private boolean player2Turn;
     private boolean undoFlag;
-    private boolean newGameFlag;
 
     //constructor, initialize game logic
     public GameLogic(){
@@ -34,7 +33,6 @@ public class GameLogic implements PlayableLogic {
         this.boardStepsCounter = new String[BOARD_SIZE][BOARD_SIZE];
         this.captureCounterArray = new int[37]; //number of pieces - default value is 0.
         this.disPiecesArray = new int[37]; //counting the distance walked every piece - default value is 0.
-        this.newGameFlag = true;
         this.player2Turn = true; //set attacker - player 2 first turn.
         this.undoFlag = false; //if undo is on, true at the end return false.
         this.movementsStack = new Stack<Movements>(); //init the stacks of moves
@@ -59,7 +57,7 @@ public class GameLogic implements PlayableLogic {
         this.boardPieces[pos.getX()][pos.getY()] = piece;
 
         //update the steps board game, count how many different pieces, steps at specific square.
-        if(!(this.newGameFlag) && piece != null) {
+        if(piece != null) {
             if (this.boardStepsCounter[pos.getX()][pos.getY()] == null) { //if the square is null, add piece step to the counter else
                 this.boardStepsCounter[pos.getX()][pos.getY()] = piece.toString() + ",";
             } else if (!(this.boardStepsCounter[pos.getX()][pos.getY()].contains(piece.toString()))) //if the square is not null, check if it contains the piece string, if not add it.
@@ -99,20 +97,6 @@ public class GameLogic implements PlayableLogic {
             }
         }return -1;
     }
-
-    //sum of steps on specific square
-    private int sumOfStepsAtSquare(Position pos){
-        if(pos != null){
-            String pieceStep = boardStepsCounter[pos.getX()][pos.getY()];
-            int counter = 0;
-            //if we found A,D,K it means attacker piece defence piece or the king piece been on the square, ever piece only once
-            for(int i = 0; i < pieceStep.length(); i++){
-                if(pieceStep.charAt(i) == 'A' || pieceStep.charAt(i) == 'D' || pieceStep.charAt(i) == 'K') counter++;
-            }
-        }
-        return -1;
-    }
-
 
     // creating the defender(pawns and king) - Player 1
     /*                   [3,5]
@@ -167,7 +151,6 @@ public class GameLogic implements PlayableLogic {
         for(int i = 3; i < 8; i++){
             updateGameBoards(new Pawn(getSecondPlayer()),new Position(i,consEndIndex));
         }
-        this.newGameFlag = false;
     }
 
     //check if the move is valid, return true if not.
@@ -251,6 +234,11 @@ public class GameLogic implements PlayableLogic {
         this.boardPieces[posCapture.getX()][posCapture.getY()] = null;
     }
 
+    private void initGameMetadata(boolean winSide){
+        GameMetadata metadata = new GameMetadata(this.boardStepsCounter,this.disPiecesArray, this.captureCounterArray, winSide);
+        //metadata.save(); //todo:init save method.
+    }
+
     //define if its valid move, updating the board(2D array), checking if the enemy has defeated according to the new position.
     @Override
     public boolean move(Position a, Position b){
@@ -303,11 +291,8 @@ public class GameLogic implements PlayableLogic {
                 if (numOfCapture > 0) updateCaptureCounter(getPieceAtPosition(b), numOfCapture);
             }
         }
-        this.player2Turn = !(this.player2Turn); //change the player turns
 
-        if(isGameFinished()) { //todo:consider the option to move the init game to the isGameFinished function
-            initGame();
-        }
+        this.player2Turn = !(this.player2Turn); //change the player turns
 
         return true;
     }
@@ -345,6 +330,7 @@ public class GameLogic implements PlayableLogic {
             if (checkCapture(kingPosition,1,0) & checkCapture(kingPosition,-1,0)
                 & checkCapture(kingPosition,0,1) & checkCapture(kingPosition,0,-1)) {
                 this.player2 = new ConcretePlayer(true, this.player2.getWins()); //increase number of wins
+                initGameMetadata(!(this.player2Turn));
                 return true;
             }
             return false;
@@ -355,6 +341,7 @@ public class GameLogic implements PlayableLogic {
                     || getPieceAtPosition(new Position(0,10)) != null
                     || getPieceAtPosition(new Position(10,10)) != null ){
                 this.player1 = new ConcretePlayer(false, this.player1.getWins()); //increase number of wins
+                initGameMetadata(!(this.player2Turn));
                 return true;
             }
             else return false;
