@@ -26,4 +26,18 @@ public class Position {
     public int getY(){
         return this.y;
     }
+
+    public int dist(Position pos){
+            int low, high;
+            if (pos.getX() == this.x) {
+            low = pos.getY() < this.y ? pos.getY() : this.y;
+            high = pos.getY() > this.y ? pos.getY() : this.y;
+            return high - low;
+            } else {
+                low = pos.getX() < this.x ? pos.getX() : this.x;
+                high = pos.getX() > this.x ? pos.getX() : this.x;
+                return high - low;
+            }
+    }
+
 }

@@ -4,6 +4,12 @@ public class King extends ConcretePiece {
     public King(Player player){
         super.player = player;
         super.pieceType = "♔"; //2654 = White King unicode
+        super.pieceName = "K7";
+    }
+
+    @Override
+    public String toString(){
+        return this.pieceName;
     }
 
 }
