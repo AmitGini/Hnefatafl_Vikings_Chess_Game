@@ -33,7 +33,7 @@ public class Movements {
         return this.capturedPieces;
     }
 
-    public Piece getPiece(){ //todo:never used, consider remove
+    public Piece getPiece(){
         return this.PIECE;
     }
 

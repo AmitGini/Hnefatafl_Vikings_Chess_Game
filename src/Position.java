@@ -40,4 +40,14 @@ public class Position {
             }
     }
 
+    public boolean equals(Position pos){
+        return this.x == pos.getX() && this.y == pos.getY();
+    }
+
+    @Override
+    public String toString(){
+        return "(" + this.x + ", " + this.y + ")";
+    }
+
+
 }

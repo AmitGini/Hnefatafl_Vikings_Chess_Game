@@ -7,27 +7,39 @@ public class Sorts{
     }
 }
 
+class SortByMovesWinner implements Comparator<MoveNode>{
+
+    @Override
+    public int compare(MoveNode nodeA, MoveNode nodeB){
+        //first: the winner side
+        int compare1 = nodeB.compareTo(nodeA); //check if A the winner or loser side
+        //sec: number of moves
+        int compare2 = Integer.compare(nodeA.getNumMoves(), nodeB.getNumMoves());
+        compare1 = (compare1 == 0) ? compare2 : compare1;
+        int compare3 = Integer.compare(nodeA.getPieceNum(),nodeB.getPieceNum());
+        if(compare1 == 0) return compare3;
+        return compare1;
+    }
+}
+
+
+
 //
 class SortByKills implements Comparator<DistanceAndKillsNode> {
 
     @Override
     public int compare(DistanceAndKillsNode nodeA, DistanceAndKillsNode nodeB){
         //compare the number of kills of each piece
-        //1nd level comparison
-        int numOfCapture = Integer.compare(nodeB.getNumOfKills(), nodeA.getNumOfKills());
+        //1st level comparison number of kills
+        int compare1 = Integer.compare(nodeB.getNumOfKills(), nodeA.getNumOfKills());
         //compare by the number of the piece
-        //2nd level comparison
-        int pieceNum = nodeA.compareTo(nodeB.getPieceNumber());
+        //2nd level comparison by piece number
+        int compare2 = Integer.compare(nodeA.getPieceNumber(), nodeB.getPieceNumber());
         //check the compressions
-        int compare = (numOfCapture == 0) ? pieceNum : numOfCapture;
-        //compare by the winner side in case the other compressions were equals.
-        if(compare == 0){
-            if (nodeA.getPieceName().charAt(0) == 'A') {
-                return nodeA.getWhoWon() ? -1 : 1;
-            } else {
-                return nodeA.getWhoWon() ? 1 : -1;
-            }
-        }return compare;
+        compare1 = (compare1 == 0) ? compare2 : compare1;
+        //3rd level comparison by the winner side in case the other compressions were equals.
+        if(compare1 == 0) return nodeB.compareTo(nodeA); //check if nodeA is the winner or the loser side.
+        return compare1;
     }
 }
 
@@ -36,21 +48,17 @@ class SortByDistance implements Comparator<DistanceAndKillsNode> {
     //sort distance of piece by 1- sum of the distance from top, 2- number of piece from down, 3- piece winner.
     @Override
     public int compare(DistanceAndKillsNode nodeA, DistanceAndKillsNode nodeB) {
-        //compare distance
-        int distanceCompare = nodeB.compareTo(nodeA);
-        //compare piece number
-        int pieceNum = nodeA.compareTo(nodeB.getPieceNumber());
-        //2nd level comparison
-        int compare = (distanceCompare == 0) ? pieceNum : distanceCompare;
+        //1st compare distance
+        int compare1 = Integer.compare(nodeB.getPieceDistance(), nodeA.getPieceDistance());
+        //2nd compare piece number
+        int compare2 = Integer.compare(nodeA.getPieceNumber(), nodeB.getPieceNumber());
+        //check compression
+        compare1 = (compare1 == 0) ? compare2 : compare1;
         //3nd level comparison
-        if (compare == 0) {
-            if (nodeA.getPieceName().charAt(0) == 'A') {
-                return nodeA.getWhoWon() ? -1 : 1;
-            } else {
-                return nodeA.getWhoWon() ? 1 : -1;
-            }
-        } else return compare;
-    }
+        if (compare1 == 0) return nodeB.compareTo(nodeA);
+        return compare1;
+        }
+
 }
 
 //sort number of steps on a square of difference pieces 1. number of steps from down, 2. by X from down 3. by Y from down
@@ -59,10 +67,13 @@ class SortBySquareSteps implements Comparator<StepsNode>{
     @Override
     public int compare(StepsNode nodeA, StepsNode nodeB){
         //compare steps
-        int stepsCompare = nodeA.compareTo(nodeB.getNumSteps());
+        int compare1 = Integer.compare(nodeB.getNumSteps(),nodeA.getNumSteps());
         // compareTo function at stepsNode class, check if the x is equal if so it compare between the y
-        int xYCompare = nodeA.compareTo(nodeB);
-        //if stepsCompare = 0 the number of steps equal so we will sort according the x and then y if the x also will be equal
-        return stepsCompare == 0 ? xYCompare : stepsCompare;
+        int compare2 = Integer.compare(nodeA.getX(), nodeB.getX());
+        //if compare1 = 0 the number of steps equal, then we will sort according the x and then y if the x also will be equal sort by y
+        compare1 = (compare1 == 0) ? compare2 : compare1;
+        int compare3 = Integer.compare(nodeA.getY(),nodeB.getY());
+        if(compare1 == 0) return compare3;
+        return compare1;
     }
 }
