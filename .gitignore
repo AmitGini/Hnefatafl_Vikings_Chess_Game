@@ -11,6 +11,7 @@ out/
 lib/
 .idea/
 production/
+tests/
 # Other
 Assignment_OOP_Hnefatafl.pdf
 Hnefatafl_Vikings_Chess_Game.iml
@@ -19,3 +20,4 @@ Output Example 2.txt
 VikingsChess.jar
 README.md
 .gitignore
+Assignment_1_OOP.pdf
