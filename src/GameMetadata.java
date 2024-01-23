@@ -1,6 +1,5 @@
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.*;
 
 public class GameMetadata {
@@ -9,7 +8,7 @@ public class GameMetadata {
     private ArrayList<DistanceAndKillsNode> arrayListDistanceAndKills;
     private ArrayList<MoveNode> arrayListMoveHistory;
 
-    public GameMetadata(Stack<Movements> moveStackHistory, String[][] boardSteps, int[] disPieces, int[] capturedPieces, boolean isplayer2Won) throws IOException {
+    public GameMetadata(Stack<Movements> moveStackHistory, String[][] boardSteps, int[] disPieces, int[] capturedPieces, boolean isplayer2Won) {
         //turn the stack upside down and insert to the array Move History field, so the first out will be the first pieces created.
         //and the moves will add next by counting and String for sorting, as well as other data that most of it constant.
         this.arrayListMoveHistory = new ArrayList<MoveNode>();
@@ -24,54 +23,40 @@ public class GameMetadata {
         saveTextFile();
     }
 
-    private void saveTextFile() throws IOException {
-        String filePath = "src/test/resources/outputs/output2.txt";
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-
-            //Moves: Sort by the winning side, number of moves, and number of piece
-            Collections.sort(this.arrayListMoveHistory, new SortByMovesWinner());
-            for (MoveNode node : this.arrayListMoveHistory) {
-                if (node.getNumMoves() > 1) {
-                    writer.write(node.toString() + " ");
-                    writer.newLine();
-                }
+    private void saveTextFile() {
+        //Moves: Sort by the winning side, number of moves, and number of piece
+        Collections.sort(this.arrayListMoveHistory, new SortByMovesWinner());
+        for (MoveNode node : this.arrayListMoveHistory) {
+            if (node.getNumMoves() > 1) {
+                System.out.println(node.toString());
             }
-
-            writer.write("*".repeat(75));
-            writer.newLine();
-
-            //Kills : Sort by the number of kills of every piece.
-            Collections.sort(this.arrayListDistanceAndKills, new SortByKills());
-            for (DistanceAndKillsNode node : this.arrayListDistanceAndKills) {
-                if (node.getNumOfKills() > 0) {
-                    writer.write(node.toString(false) + " ");
-                    writer.newLine();
-                }
-            }
-
-            writer.write("*".repeat(75));
-            writer.newLine();
-
-            //Distance : sort by the distance every piece did
-            Collections.sort(this.arrayListDistanceAndKills, new SortByDistance());
-            for (DistanceAndKillsNode node : this.arrayListDistanceAndKills) {   //printing distance
-                if (node.getPieceDistance() > 0) {
-                    writer.write(node.toString(true) + " ");
-                    writer.newLine();
-                }
-            }
-
-            writer.write("*".repeat(75));
-            writer.newLine();
-
-            //Steps : sort by number of steps of different piece on a specific square on the board.
-            Collections.sort(this.arrayListSteps, new SortBySquareSteps());
-            for (StepsNode node : this.arrayListSteps) {    //     printing by steps
-                writer.write(node.toString() + " ");
-                writer.newLine();
-            }
-            writer.write("*".repeat(75));
         }
+        System.out.println("*".repeat(75));
+
+        //Kills : Sort by the number of kills of every piece.
+        Collections.sort(this.arrayListDistanceAndKills, new SortByKills());
+        for (DistanceAndKillsNode node : this.arrayListDistanceAndKills) {
+            if (node.getNumOfKills() > 0) {
+                System.out.println(node.toString(false));
+            }
+        }
+        System.out.println("*".repeat(75));
+
+        //Distance : sort by the distance every piece did
+        Collections.sort(this.arrayListDistanceAndKills, new SortByDistance());
+        for (DistanceAndKillsNode node : this.arrayListDistanceAndKills) {   //printing distance
+            if (node.getPieceDistance() > 0) {
+                System.out.println(node.toString(true));
+            }
+        }
+        System.out.println("*".repeat(75));
+
+        //Steps : sort by number of steps of different piece on a specific square on the board.
+        Collections.sort(this.arrayListSteps, new SortBySquareSteps());
+        for (StepsNode node : this.arrayListSteps) {    //     printing by steps
+            System.out.println(node.toString());
+        }
+        System.out.println("*".repeat(75));
     }
 
     private void insertArrayMoves(Stack<Movements> movesStack, boolean whoWon) {
@@ -132,7 +117,7 @@ public class GameMetadata {
                                 counter++;
                         }
                         if(counter > 1) {
-                            StepsNode tempNode = new StepsNode(i,j, counter);
+                            StepsNode tempNode = new StepsNode(j,i, counter);
                             this.arrayListSteps.add(tempNode);
                         }
                     }
@@ -207,7 +192,7 @@ class MoveNode{
     }
 
     public void setAllMoves(String move){
-        this.allMoves += move;
+        this.allMoves = this.allMoves + ", " + move;
         this.numMoves++;
     }
 

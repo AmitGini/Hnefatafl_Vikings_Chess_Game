@@ -226,7 +226,7 @@ public class GameLogic implements PlayableLogic {
             }
             return false;
         }
-        //if the step checked is invalid move, and it's the king, return true since he is being blocked
+        //if the step checked is an invalid move, and it's the king, return true since he is being blocked
         //and it's a winning option
         return isThatTheKing(a);
     }
@@ -236,7 +236,7 @@ public class GameLogic implements PlayableLogic {
         this.boardPieces[posCapture.getX()][posCapture.getY()] = null;
     }
 
-    private void initGameMetadata(boolean winSide) throws IOException {
+    private void initGameMetadata(boolean winSide) {
         GameMetadata metadata = new GameMetadata(this.movementsStack, this.boardStepsCounter,this.disPiecesArray, this.captureCounterArray, winSide);
     }
 
@@ -295,6 +295,12 @@ public class GameLogic implements PlayableLogic {
 
         this.player2Turn = !(this.player2Turn); //change the player turns
 
+        if(isGameFinished()){
+            initGameMetadata(!this.player2Turn);
+        }
+
+
+
         return true;
     }
 
@@ -331,11 +337,6 @@ public class GameLogic implements PlayableLogic {
             if (checkCapture(kingPosition,1,0) & checkCapture(kingPosition,-1,0)
                 & checkCapture(kingPosition,0,1) & checkCapture(kingPosition,0,-1)) {
                 this.player2 = new ConcretePlayer(true, this.player2.getWins()); //increase number of wins
-                try {
-                    initGameMetadata(true);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
                 return true;
             }
             return false;
@@ -346,11 +347,6 @@ public class GameLogic implements PlayableLogic {
                     || getPieceAtPosition(new Position(0,10)) != null
                     || getPieceAtPosition(new Position(10,10)) != null ){
                 this.player1 = new ConcretePlayer(false, this.player1.getWins()); //increase number of wins
-                try {
-                    initGameMetadata(false);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
                 return true;
             }
             else return false;

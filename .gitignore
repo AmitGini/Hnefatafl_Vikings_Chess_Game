@@ -10,9 +10,12 @@
 out/
 lib/
 .idea/
+production/
 # Other
 Assignment_OOP_Hnefatafl.pdf
 Hnefatafl_Vikings_Chess_Game.iml
 Output Example 1.txt
 Output Example 2.txt
 VikingsChess.jar
+README.md
+.gitignore
