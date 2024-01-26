@@ -8,12 +8,10 @@ public class Pawn extends ConcretePiece {
         //enter unicode of pawn
         super.pieceType = "♟"; //2659 = pawn unicode
         //naming the piece the way they are created, D1 - D13(NO D7 = KING = K7), A1 - A24.
+        //toString implement at concretePiece and return the pieceName
         super.pieceName = setPieceName(); //unique key, is the piece name.
         pieceCounter++; //updating the piece counter
     }
-
-    @Override
-    public String toString(){return this.pieceName;}
 
     //piece counter.
     private int countPiecesHelper(){
@@ -25,10 +23,11 @@ public class Pawn extends ConcretePiece {
     //naming the piece the way they are created, D1 - D13(NO D7 = KING = K7), A1 - A24.
     private String setPieceName(){
         String prefixAD = this.player.isPlayerOne() ? "D" : "A";
-         String name =  this.player.isPlayerOne() ? prefixAD + (countPiecesHelper() + 1):
+        String name =  this.player.isPlayerOne() ? prefixAD + (countPiecesHelper() + 1):
                 prefixAD + (countPiecesHelper() - 12);
-         return name;
+        return name;
     }
+
 
 
 }

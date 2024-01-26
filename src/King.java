@@ -7,10 +7,5 @@ public class King extends ConcretePiece {
         super.pieceName = "K7";
     }
 
-    @Override
-    public String toString(){
-        return this.pieceName;
-    }
-
 }
 

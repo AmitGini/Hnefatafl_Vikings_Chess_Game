@@ -1,11 +1,7 @@
 import java.lang.*;
 import java.util.*;
 
-public class Sorts{
-    public Sorts(){
-
-    }
-}
+public abstract class Sorts{}
 
 class SortByMovesWinner implements Comparator<MoveNode>{
 
@@ -45,6 +41,7 @@ class SortByKills implements Comparator<DistanceAndKillsNode> {
 
 //sort distance of piece by 1- sum of the distance from top, 2- number of piece from down, 3- piece winner.
 class SortByDistance implements Comparator<DistanceAndKillsNode> {
+
     //sort distance of piece by 1- sum of the distance from top, 2- number of piece from down, 3- piece winner.
     @Override
     public int compare(DistanceAndKillsNode nodeA, DistanceAndKillsNode nodeB) {
