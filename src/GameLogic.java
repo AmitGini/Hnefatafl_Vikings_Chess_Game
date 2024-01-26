@@ -227,12 +227,8 @@ public class GameLogic implements PlayableLogic {
     }
 
     private void capture(Position posCapture){
-        this.movementsStack.peek().setCapture(posCapture,getPieceAtPosition(posCapture));
-        this.boardPieces[posCapture.getX()][posCapture.getY()] = null;
-    }
-
-    private void initGameMetadata(boolean winSide) {
-        GameMetadata metadata = new GameMetadata(this.movementsStack, this.boardStepsCounter,this.disPiecesArray, this.captureCounterArray, winSide);
+        this.movementsStack.peek().setCapture(posCapture,getPieceAtPosition(posCapture)); //adding to the last movement, the piece that been captured
+        this.boardPieces[posCapture.getX()][posCapture.getY()] = null; //changing the captured position to null, so the piece will be removed from the game board.
     }
 
     //define if its valid move, updating the board(2D array), checking if the enemy has defeated according to the new position.
@@ -344,19 +340,20 @@ public class GameLogic implements PlayableLogic {
     @Override
     public void reset() {
         if(!isGameFinished()) {
-            //if game isnt finished and reset was activated, its because we want to reset the game and the player data
+            //if game isn't finished and reset was activated, It's because we want to reset the game and the player data
             this.player1 = new ConcretePlayer(false); //defender - player 1
             this.player2 = new ConcretePlayer(true); //attacker - player 2 (first move in new game)
         }else { // else
-            // if its player 2 turn, player 1 won
+            // if its player 2 turns, player 1's won
             // since the turn change after the move, the player at the last move won. this.player1.addWin(); //increase number of wins
             if(this.player2Turn ) {
                 this.player1.addWin();
             }else {
                 this.player2.addWin();
             }
-            // either way print all the data
-            initGameMetadata(!this.player2Turn);
+            //activating the metadata statics sorting and printing after the game is finished(not restarted)
+            GameMetadata gameMetadata = new GameMetadata(this.movementsStack, this.boardStepsCounter,this.disPiecesArray, this.captureCounterArray, !this.player2Turn);
+            gameMetadata.sortAndPrint();
             }
         //reset all the proper settings for a new logic game
         initGame();

@@ -19,11 +19,10 @@ public class GameMetadata {
 
         this.arrayListSteps = new ArrayList<StepsNode>();
         insertArrayListSteps(boardSteps); //steps board counter, insert with the sum of steps on each square
-
-        saveTextFile();
     }
 
-    private void saveTextFile() {
+    //todo: add note
+    public void sortAndPrint() {
         //Moves: Sort by the winning side, number of moves, and number of piece
         Collections.sort(this.arrayListMoveHistory, new SortByMovesWinner());
         for (MoveNode node : this.arrayListMoveHistory) {
@@ -126,6 +125,7 @@ public class GameMetadata {
         }
     }
 
+    //todo: add note
     private void insertArrayListDisAndKills(int[] pieceDistance, int[] numCapture, boolean winner){
         if(pieceDistance != null){
             for(int i = 0; i < pieceDistance.length; i++){
@@ -143,6 +143,7 @@ public class GameMetadata {
         return pieceName;
     }
 
+    //todo: add note
     private int getPieceNumber(int indexInArray){
         int pieceNum = indexInArray < 13 ? indexInArray + 1 : indexInArray - 12;
         return pieceNum;
@@ -150,7 +151,7 @@ public class GameMetadata {
 
 }
 
-
+//todo: add note
 class MoveNode{
 
     private String pieceName;
@@ -253,7 +254,7 @@ class StepsNode{
 }
 
 
-//todo: edit
+//todo: add note
 class DistanceAndKillsNode {
 
     private String pieceName;
