@@ -4,6 +4,8 @@ import java.util.Stack;
 public class GameLogic implements PlayableLogic {
 
     private final int BOARD_SIZE = 11;
+    private final int NUMBER_OF_PIECES = 37;
+    private final int NUMBER_OF_PIECES_PLAYER1 = 13;
 
     //board settings
     private Piece[][] boardPieces; //board main game
@@ -13,9 +15,8 @@ public class GameLogic implements PlayableLogic {
 
 
     private Stack<Movements> movementsStack;
-
-    private Player player1; //defender
-    private Player player2; //attacker (first move in new game)
+    private ConcretePlayer player1; //defender
+    private ConcretePlayer player2; //attacker (first move in new game)
     private Position kingPosition;
     private boolean player2Turn;
     private boolean undoFlag;
@@ -33,8 +34,8 @@ public class GameLogic implements PlayableLogic {
     private void initGame(){
         resetBoard(); //reset the board to null;
         this.boardStepsCounter = new String[BOARD_SIZE][BOARD_SIZE];
-        this.captureCounterArray = new int[37]; //number of pieces - default value is 0.
-        this.disPiecesArray = new int[37]; //counting the distance walked every piece - default value is 0.
+        this.captureCounterArray = new int[NUMBER_OF_PIECES]; //number of pieces - default value is 0.
+        this.disPiecesArray = new int[NUMBER_OF_PIECES]; //counting the distance walked every piece - default value is 0.
         this.player2Turn = true; //set attacker - player 2 first turn.
         this.undoFlag = false; //if undo is on, true at the end return false.
         this.newGameFlag = true; //new game started
@@ -89,12 +90,12 @@ public class GameLogic implements PlayableLogic {
     //calculate the index at array of every piece at the board
     private int pieceIndex(Piece piece){
         if(piece != null) {
-            if(piece.getType().equals("♔")) return 6; //king constant index at the array
+            if(piece.getType().equals("♔")) return 6; //king constant index at the array(KING is number 7 but since the array start from 0 king is index 6)
             String pieceString = piece.toString().substring(1);
             if(piece.getOwner().isPlayerOne()) {
                 return Integer.parseInt(pieceString) - 1; // -1 becuase the string index start from 1 and the array from 0
             }else{
-                return Integer.parseInt(pieceString) + 13 - 1; // +13 because the first 13 piece are player 1 piece, and -1 same reason as wrote at condition 1.
+                return Integer.parseInt(pieceString) + NUMBER_OF_PIECES_PLAYER1 - 1; // +13 because the first 13 piece are player 1 piece, and -1 same reason as wrote at condition 1.
             }
         }return -1;
     }
@@ -176,7 +177,7 @@ public class GameLogic implements PlayableLogic {
         }
 
         //illegal move for pawns: [0,0],[0,10],[10,0],[10,10]
-        if(!(isThatTheKing(a))) {
+        if(getPieceAtPosition(a) instanceof Pawn) {
             if (b.getX() == 0 && b.getY() == 0) return true; // [0,0]
             if (b.getX() == 10 && b.getY() == 0) return true;// [10,0]
             if (b.getX() == 0 && b.getY() == 10) return true;// [0,10]
@@ -193,32 +194,26 @@ public class GameLogic implements PlayableLogic {
         return ((isSecondPlayerTurn() && !(isPlayer1Piece)) || (!(isSecondPlayerTurn()) && isPlayer1Piece));
     }
 
-    //check if the king is a specific position
-    private boolean isThatTheKing(Position a){
-        //check if the position given similar to the king position.
-        return (a.getX() == kingPosition.getX() && a.getY() == kingPosition.getY());
-    }
-
     private boolean checkCapture(Position a, int stepX, int stepY){
         Position step = new Position(a, stepX, stepY);
-        if (!(isInvalidMove(a,step))){ //get in, if the step is in a valid attack position
+        if (!(isInvalidMove(a,step))){ //get in, only if the step is in a valid attack position
 
             //if the position at step is null, it can occur because the piece at the boarders of the board game
             // in the other hand if it's the king that god cornered we need to check for player 2 win opportunity
             if (!(getPieceAtPosition(step) == null)){
-                if (!(isItMyPieceAndTurn(step)) && !(isThatTheKing(step))) {
-                    //if a is the king and next step is not player1 piece then king is blocked.
+                if (!(isItMyPieceAndTurn(step)) && getPieceAtPosition(step) instanceof  Pawn) {
+                    //if a is the king and next step is not player1 piece, then king is blocked.
                     //at move function we made sure that after player2 move, the turn will change
                     //so the king will always be at the same turn and check for enemy's surround him
-                    if(isThatTheKing(a)) return true;
+                    if(getPieceAtPosition(a) instanceof  King) return true;
                     Position step2 = new Position(step, stepX, stepY);
 
                     if (isInvalidMove(a, step2)) {
                         capture(step); //capture if the piece got cornered
                         return true;
 
-                    } else if (isItMyPieceAndTurn(step2) && !(isThatTheKing(step2))) {
-                        capture(step); //capture the piece if we have 2 piece between the enemy piece
+                    } else if (isItMyPieceAndTurn(step2) && getPieceAtPosition(step2) instanceof  Pawn) {
+                        capture(step); //capture the piece if we have 2 pieces between the enemy piece
                         return true;
                     }
                 }
@@ -226,14 +221,19 @@ public class GameLogic implements PlayableLogic {
             }
             return false;
         }
-        //if the step checked is invalid move, and it's the king, return true since he is being blocked
+        //if the step checked is an invalid move, and it's the king, return true since he is being blocked
         //and it's a winning option
-        return isThatTheKing(a);
+        return getPieceAtPosition(a) instanceof King;
     }
 
     private void capture(Position posCapture){
+<<<<<<< HEAD:GameLogic.java
         movementsStack.peek().setCapture(posCapture,getPieceAtPosition(posCapture));
         this.boardPieces[posCapture.getX()][posCapture.getY()] = null;
+=======
+        this.movementsStack.peek().setCapture(posCapture,getPieceAtPosition(posCapture)); //adding to the last movement, the piece that been captured
+        this.boardPieces[posCapture.getX()][posCapture.getY()] = null; //changing the captured position to null, so the piece will be removed from the game board.
+>>>>>>> d6563dc1b961b2f51f2d4fd4ac3e06099ff885eb:src/GameLogic.java
     }
 
     //define if its valid move, updating the board(2D array), checking if the enemy has defeated according to the new position.
@@ -263,22 +263,22 @@ public class GameLogic implements PlayableLogic {
         }
 
         //checking if it's the king and updating king position before changing the board
-        if(isThatTheKing(a)) this.kingPosition = b; //if it's the king we need to update the field representing its position
+        if(getPieceAtPosition(a) instanceof King) this.kingPosition = b; //if it's the king we need to update the field representing its position
 
         //updating the board according to the position moves
         updateGameBoards(getPieceAtPosition(a),b);
         updateGameBoards(null,a);
-        updateDistPieces(getPieceAtPosition(b),b,a); //after update the board game, piece is at position b
+        updateDistPieces(getPieceAtPosition(b),b,a); //after update the board game, the piece is at position b
         //add the move to stack, if its undo move then its poped again at undo function
         if(!(undoFlag)) {
-            //current position is b and previous position is a
+            //the current position is b and the previous position is a
             this.movementsStack.push(new Movements(b, a, getPieceAtPosition(b), this.player2Turn));
 
             //since the king cant capture, check if it's not the king, only then calling checkCapture function
             //to check if there are pieces of the other player that have been captured.
-            //checking if its the king position even after I update, because the function check
-            //the position king field, that updated only at the else.
-            if (!(isThatTheKing(b))) {
+            //checking if its king position even after I update, because the function check
+            //the position king field, that is updated only at the else.
+            if (getPieceAtPosition(b) instanceof Pawn) {
                 //todo: update numOfCapture if return true + update the number of captured by every piece
                 int numOfCapture = 0;
                 if (checkCapture(b, 1, 0)) numOfCapture++;
@@ -331,6 +331,7 @@ public class GameLogic implements PlayableLogic {
     public boolean isGameFinished(){
         //changing the turn before isGameFinished function, that why the boolean is set at NOT
         if(!(isSecondPlayerTurn())){
+<<<<<<< HEAD:GameLogic.java
             if (checkCapture(kingPosition,1,0) & checkCapture(kingPosition,-1,0)
                 & checkCapture(kingPosition,0,1) & checkCapture(kingPosition,0,-1)) {
                 this.player2 = new ConcretePlayer(true, this.player2.getWins()); //increase number of wins
@@ -339,21 +340,28 @@ public class GameLogic implements PlayableLogic {
 //                } catch (IOException e) {
 //                    throw new RuntimeException(e);
 //                }
+=======
+            if (checkCapture(this.kingPosition,1,0) & checkCapture(this.kingPosition,-1,0)
+                & checkCapture(this.kingPosition,0,1) & checkCapture(this.kingPosition,0,-1)) {
+>>>>>>> d6563dc1b961b2f51f2d4fd4ac3e06099ff885eb:src/GameLogic.java
                 return true;
             }
             return false;
         }else{
-            //checking when its the first player turn if the condition for winning occur.
+            //checking when its the first player turn if the condition for winning occurs.
             if (getPieceAtPosition(new Position(0,0)) != null
                     || getPieceAtPosition(new Position(10,0)) != null
                     || getPieceAtPosition(new Position(0,10)) != null
                     || getPieceAtPosition(new Position(10,10)) != null ){
+<<<<<<< HEAD:GameLogic.java
                 this.player1 = new ConcretePlayer(false, this.player1.getWins()); //increase number of wins
 //                try {
 //                    initGameMetadata(false);
 //                } catch (IOException e) {
 //                    throw new RuntimeException(e);
 //                }
+=======
+>>>>>>> d6563dc1b961b2f51f2d4fd4ac3e06099ff885eb:src/GameLogic.java
                 return true;
             }
             else return false;
@@ -363,8 +371,23 @@ public class GameLogic implements PlayableLogic {
     // reset the board pieces(Array 2D), and the information of the players.
     @Override
     public void reset() {
-        this.player1 = new ConcretePlayer(false); //defender
-        this.player2 = new ConcretePlayer(true); //attacker (first move in new game)
+        if(!isGameFinished()) {
+            //if game isn't finished and reset was activated, It's because we want to reset the game and the player data
+            this.player1 = new ConcretePlayer(false); //defender - player 1
+            this.player2 = new ConcretePlayer(true); //attacker - player 2 (first move in new game)
+        }else { // else
+            // if its player 2 turns, player 1's won
+            // since the turn change after the move, the player at the last move won. this.player1.addWin(); //increase number of wins
+            if(this.player2Turn ) {
+                this.player1.addWin();
+            }else {
+                this.player2.addWin();
+            }
+            //activating the metadata statics sorting and printing after the game is finished(not restarted)
+            GameMetadata gameMetadata = new GameMetadata(this.movementsStack, this.boardStepsCounter,this.disPiecesArray, this.captureCounterArray, !this.player2Turn);
+            gameMetadata.sortAndPrint();
+            }
+        //reset all the proper settings for a new logic game
         initGame();
     }
 
@@ -381,8 +404,8 @@ public class GameLogic implements PlayableLogic {
 
             move(currentPos, previousPos); //return to the last position
 
-            //if it's not the king we need to check if their any captured enemy we need to return.
-            if(!(isThatTheKing(previousPos))){
+            //if it's not the king, we need to check if their any captured enemy we need to return.
+            if(getPieceAtPosition(previousPos) instanceof  Pawn){
                 Position[] capturedPos = lastMove.getCapturedPosition();
                 Piece[] capturedPieces = lastMove.getCapturedPieces();
                 for(int i = 0; i < 4; i++){

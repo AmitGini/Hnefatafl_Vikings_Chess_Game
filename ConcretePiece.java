@@ -8,6 +8,10 @@ public abstract class ConcretePiece implements Piece{
     public ConcretePiece(){
     }
 
+    //taking toString function that extends by the Object class, and override it to return the name of the piece.
+    @Override
+    public String toString(){return this.pieceName;}
+
     @Override
     public Player getOwner() {
         return this.player;
@@ -17,6 +21,7 @@ public abstract class ConcretePiece implements Piece{
     public String getType(){
         return this.pieceType;
     }
+
 
 
 }
