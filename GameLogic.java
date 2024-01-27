@@ -236,10 +236,6 @@ public class GameLogic implements PlayableLogic {
         this.boardPieces[posCapture.getX()][posCapture.getY()] = null;
     }
 
-    private void initGameMetadata(boolean winSide) throws IOException {
-        GameMetadata metadata = new GameMetadata(this.movementsStack, this.boardStepsCounter,this.disPiecesArray, this.captureCounterArray, winSide);
-    }
-
     //define if its valid move, updating the board(2D array), checking if the enemy has defeated according to the new position.
     @Override
     public boolean move(Position a, Position b){
@@ -295,6 +291,13 @@ public class GameLogic implements PlayableLogic {
 
         this.player2Turn = !(this.player2Turn); //change the player turns
 
+        if(isGameFinished()){
+            try {
+                GameMetadata metadata = new GameMetadata(this.movementsStack, this.boardStepsCounter,this.disPiecesArray, this.captureCounterArray, !(this.player2Turn));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+        }
         return true;
     }
 
@@ -331,11 +334,11 @@ public class GameLogic implements PlayableLogic {
             if (checkCapture(kingPosition,1,0) & checkCapture(kingPosition,-1,0)
                 & checkCapture(kingPosition,0,1) & checkCapture(kingPosition,0,-1)) {
                 this.player2 = new ConcretePlayer(true, this.player2.getWins()); //increase number of wins
-                try {
-                    initGameMetadata(true);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+//                try {
+//                    initGameMetadata(true);
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
                 return true;
             }
             return false;
@@ -346,11 +349,11 @@ public class GameLogic implements PlayableLogic {
                     || getPieceAtPosition(new Position(0,10)) != null
                     || getPieceAtPosition(new Position(10,10)) != null ){
                 this.player1 = new ConcretePlayer(false, this.player1.getWins()); //increase number of wins
-                try {
-                    initGameMetadata(false);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+//                try {
+//                    initGameMetadata(false);
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
                 return true;
             }
             else return false;

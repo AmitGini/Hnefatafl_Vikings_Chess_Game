@@ -24,8 +24,8 @@ public class GameMetadata {
         saveTextFile();
     }
 
-    private void saveTextFile() throws IOException {
-        String filePath = "src/test/resources/outputs/output2.txt";
+    public void saveTextFile() throws IOException {
+        String filePath = "src/test/resources/outputs/output.txt";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
 
             //Moves: Sort by the winning side, number of moves, and number of piece

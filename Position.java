@@ -41,7 +41,7 @@ public class Position {
     }
 
     public boolean equals(Position pos){
-        return this.x == pos.getX() && this.y == pos.getY();
+        return this.y == pos.getX() && this.x == pos.getY();
     }
 
     @Override
