@@ -285,6 +285,7 @@ public class GameLogic implements PlayableLogic {
         }
 
         this.player2Turn = !(this.player2Turn); //change the player turns
+       isGameFinished();
 
         return true;
     }
@@ -321,6 +322,8 @@ public class GameLogic implements PlayableLogic {
         if(!(isSecondPlayerTurn())){
             if (checkCapture(this.kingPosition,1,0) & checkCapture(this.kingPosition,-1,0)
                 & checkCapture(this.kingPosition,0,1) & checkCapture(this.kingPosition,0,-1)) {
+                GameMetadata gameMetadata = new GameMetadata(this.movementsStack, this.boardStepsCounter,this.disPiecesArray, this.captureCounterArray, !this.player2Turn);
+                gameMetadata.sortAndPrint();
                 return true;
             }
             return false;
@@ -330,6 +333,8 @@ public class GameLogic implements PlayableLogic {
                     || getPieceAtPosition(new Position(10,0)) != null
                     || getPieceAtPosition(new Position(0,10)) != null
                     || getPieceAtPosition(new Position(10,10)) != null ){
+                GameMetadata gameMetadata = new GameMetadata(this.movementsStack, this.boardStepsCounter,this.disPiecesArray, this.captureCounterArray, !this.player2Turn);
+                gameMetadata.sortAndPrint();
                 return true;
             }
             else return false;
@@ -352,8 +357,6 @@ public class GameLogic implements PlayableLogic {
                 this.player2.addWin();
             }
             //activating the metadata statics sorting and printing after the game is finished(not restarted)
-            GameMetadata gameMetadata = new GameMetadata(this.movementsStack, this.boardStepsCounter,this.disPiecesArray, this.captureCounterArray, !this.player2Turn);
-            gameMetadata.sortAndPrint();
             }
         //reset all the proper settings for a new logic game
         initGame();

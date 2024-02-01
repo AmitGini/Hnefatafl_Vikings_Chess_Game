@@ -1,5 +1,3 @@
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.util.*;
 
 public class GameMetadata {
@@ -19,6 +17,7 @@ public class GameMetadata {
 
         this.arrayListSteps = new ArrayList<StepsNode>();
         insertArrayListSteps(boardSteps); //steps board counter, insert with the sum of steps on each square
+
     }
 
     //todo: add note
