@@ -227,13 +227,8 @@ public class GameLogic implements PlayableLogic {
     }
 
     private void capture(Position posCapture){
-<<<<<<< HEAD:GameLogic.java
-        movementsStack.peek().setCapture(posCapture,getPieceAtPosition(posCapture));
-        this.boardPieces[posCapture.getX()][posCapture.getY()] = null;
-=======
         this.movementsStack.peek().setCapture(posCapture,getPieceAtPosition(posCapture)); //adding to the last movement, the piece that been captured
         this.boardPieces[posCapture.getX()][posCapture.getY()] = null; //changing the captured position to null, so the piece will be removed from the game board.
->>>>>>> d6563dc1b961b2f51f2d4fd4ac3e06099ff885eb:src/GameLogic.java
     }
 
     //define if its valid move, updating the board(2D array), checking if the enemy has defeated according to the new position.
@@ -291,13 +286,6 @@ public class GameLogic implements PlayableLogic {
 
         this.player2Turn = !(this.player2Turn); //change the player turns
 
-        if(isGameFinished()){
-            try {
-                GameMetadata metadata = new GameMetadata(this.movementsStack, this.boardStepsCounter,this.disPiecesArray, this.captureCounterArray, !(this.player2Turn));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-        }
         return true;
     }
 
@@ -331,19 +319,8 @@ public class GameLogic implements PlayableLogic {
     public boolean isGameFinished(){
         //changing the turn before isGameFinished function, that why the boolean is set at NOT
         if(!(isSecondPlayerTurn())){
-<<<<<<< HEAD:GameLogic.java
-            if (checkCapture(kingPosition,1,0) & checkCapture(kingPosition,-1,0)
-                & checkCapture(kingPosition,0,1) & checkCapture(kingPosition,0,-1)) {
-                this.player2 = new ConcretePlayer(true, this.player2.getWins()); //increase number of wins
-//                try {
-//                    initGameMetadata(true);
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-=======
             if (checkCapture(this.kingPosition,1,0) & checkCapture(this.kingPosition,-1,0)
                 & checkCapture(this.kingPosition,0,1) & checkCapture(this.kingPosition,0,-1)) {
->>>>>>> d6563dc1b961b2f51f2d4fd4ac3e06099ff885eb:src/GameLogic.java
                 return true;
             }
             return false;
@@ -353,15 +330,6 @@ public class GameLogic implements PlayableLogic {
                     || getPieceAtPosition(new Position(10,0)) != null
                     || getPieceAtPosition(new Position(0,10)) != null
                     || getPieceAtPosition(new Position(10,10)) != null ){
-<<<<<<< HEAD:GameLogic.java
-                this.player1 = new ConcretePlayer(false, this.player1.getWins()); //increase number of wins
-//                try {
-//                    initGameMetadata(false);
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-=======
->>>>>>> d6563dc1b961b2f51f2d4fd4ac3e06099ff885eb:src/GameLogic.java
                 return true;
             }
             else return false;

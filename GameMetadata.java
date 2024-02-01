@@ -21,19 +21,6 @@ public class GameMetadata {
         insertArrayListSteps(boardSteps); //steps board counter, insert with the sum of steps on each square
     }
 
-<<<<<<< HEAD:GameMetadata.java
-    public void saveTextFile() throws IOException {
-        String filePath = "src/test/resources/outputs/output.txt";
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-
-            //Moves: Sort by the winning side, number of moves, and number of piece
-            Collections.sort(this.arrayListMoveHistory, new SortByMovesWinner());
-            for (MoveNode node : this.arrayListMoveHistory) {
-                if (node.getNumMoves() > 1) {
-                    writer.write(node.toString() + " ");
-                    writer.newLine();
-                }
-=======
     //todo: add note
     public void sortAndPrint() {
         //Moves: Sort by the winning side, number of moves, and number of piece
@@ -41,7 +28,6 @@ public class GameMetadata {
         for (MoveNode node : this.arrayListMoveHistory) {
             if (node.getNumMoves() > 1) {
                 System.out.println(node.toString());
->>>>>>> d6563dc1b961b2f51f2d4fd4ac3e06099ff885eb:src/GameMetadata.java
             }
         }
         System.out.println("*".repeat(75));
